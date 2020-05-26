@@ -27,20 +27,29 @@
     <div id="map"></div>
     <script>
       // load data
-      d3.json("./resources/suburbs.topojson", function(error, data) {
+      d3.json("./resources/electorates.topojson", function(error, data) {
         if (error) throw error;
         // format data
-        suburbData = topojson.feature(data, data.objects.suburbs);
+        electorateData = topojson.feature(data, data.objects.electorates);
+        // set up centroids
+        electorateData.features
+          .forEach(function(d) {
+            d.properties.centroid = d3.geoCentroid(d);
+            if (d.properties.electorate == "brindabella") {
+              d.properties.centroid[0] = d.properties.centroid[0] + .1;
+              d.properties.centroid[1] = d.properties.centroid[1] + .15;
+            }
+          });
         // set up MapBox engine
         mapboxgl.accessToken = "pk.eyJ1IjoibmV3cy1vbjFpbmUiLCJhIjoiR3FlZFZlVSJ9._30EFE9XYhQitqf4gzRG-g";
         map = new mapboxgl.Map({
           container: "map",
-          style: "mapbox://styles/mapbox/light-v10",
+          style: "mapbox://styles/mapbox/dark-v10",
           center: [149.126944, -35.293056],
           attributionControl: false,
-          zoom: 2,
-          minZoom: 7,
-          maxZoom: 15,
+          zoom: 10,
+          minZoom: 8,
+          maxZoom: 12,
           pitchWithRotate: false,
           dragRotate: false,
           touchZoomRotate: false
@@ -70,15 +79,18 @@
           projection = calcProjection();
           path = d3.geoPath();
           // set up SVGs
-          suburbs = svgGroup
-            .selectAll(".suburb")
-              .data(suburbData.features)
+          electorates = svgGroup
+            .selectAll(".electorate")
+              .data(electorateData.features)
             .enter().append("path")
-              .classed("suburb", true);
-          // initial positioning
-          // map.fitBounds(d3.geoBounds(suburbData), {
-          //   padding: margin
-          // });
+              .classed("electorate", true)
+              .attr("id", function(d) { return d.properties.electorate; });
+          labels = svgGroup
+            .selectAll(".label")
+              .data(electorateData.features)
+            .enter().append("text")
+              .classed("label", true)
+              .text(function(d) { return d.properties.electorate.slice(0, 1).toUpperCase() + d.properties.electorate.slice(1); });
           // re-render SVGs upon movement
           map.on("viewreset", render)
             .on("move", render)
@@ -91,8 +103,9 @@
         projection = calcProjection();
         path.projection(projection);
         // draw SVGs
-        suburbs.attr("d", path);
-
+        electorates.attr("d", path);
+        labels.attr("x", function(d) { return projection(d.properties.centroid)[0]; })
+          .attr("y", function(d) { return projection(d.properties.centroid)[1] });
       }
       // recalculates D3 map projection when map moves
       function calcProjection() {
