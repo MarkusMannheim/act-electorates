@@ -52,7 +52,7 @@
             }
             centroids.push(centroid);
           });
-        bounds = d3.geoBounds(electorateData);
+        bounds = d3.geoBounds({ type: "FeatureCollection", features: centroids });
         // set up MapBox engine
         mapboxgl.accessToken = "pk.eyJ1IjoibmV3cy1vbjFpbmUiLCJhIjoiR3FlZFZlVSJ9._30EFE9XYhQitqf4gzRG-g";
         map = new mapboxgl.Map({
@@ -66,20 +66,18 @@
           pitchWithRotate: false,
           dragRotate: false,
           touchZoomRotate: false,
-          maxBounds: bounds
+          maxBounds: [[bounds[0][0] - .25, bounds[0][1] - .25], [bounds[1][0] + .25, bounds[1][1] + .25]]
         });
         // add navigation and custom attribution
         map.on("load", function() {
           map.addControl(new mapboxgl.AttributionControl({
-              compact: true
+              compact: true,
+              customAttribution: "&copy; Australian Bureau of Statistics"
             }))
             .addControl(new mapboxgl.NavigationControl({
               showCompass: false
             }))
             .resize();
-          let attribution = d3.select(".mapboxgl-ctrl-attrib-inner");
-          attribution.html("&copy; ACT Government <a href='https://creativecommons.org/licenses/by/4.0/'>(CC BY 4.0)</a> | " + attribution.html());
-          attribution.html(attribution.html().slice(0, -250));
           // svg layer
           container = map.getCanvasContainer();
           svg = d3.select(container)
@@ -116,7 +114,7 @@
               .duration(2000)
               .style("opacity", 1);
           d3.timeout(function() {
-            map.fitBounds(d3.geoBounds({type:"FeatureCollection",features:centroids}), {
+            map.fitBounds(bounds, {
               padding: margin,
               duration: 3000
             });
