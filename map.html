@@ -116,10 +116,10 @@
           d3.timeout(function() {
             map.fitBounds(bounds, {
               padding: margin,
-              duration: 3000
+              duration: 2000
             });
             labels.transition()
-              .duration(2000)
+              .duration(1000)
               .style("opacity", 1);
           }, 1000);
         });
