@@ -39,12 +39,12 @@ body {
 #footer {
   position: fixed;
   bottom: 0;
-  height: 16px;
+  height: .5rem;
   width: 100%;
   background-color: #f9f9f9;
 }
 .mapboxgl-ctrl-bottom-right {
-  bottom: 16px;
+  bottom: .5rem;
 }
 .electorate {
   stroke: white;
