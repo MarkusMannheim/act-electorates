@@ -97,9 +97,16 @@ h1, p {
   stroke-width: .5;
   stroke: #666;
 }
+.tick line {
+  stroke-dasharray: 3 3;
+}
 .tick text {
   fill: #666;
   font-size: .7rem;
+}
+.axisLabel {
+  font-size: .85rem;
+  fill: #333;
 }
 @media only screen and (min-width: 500px) {
   .tick text {

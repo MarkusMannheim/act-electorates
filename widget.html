@@ -104,13 +104,32 @@
             graphType = type;
             setUp();
           } else {
-            graphType = type;
-            d3.selectAll("#chartGroup *, #xAxisGroup *, #yAxisGroup *")
+            d3.selectAll("#xAxisGroup *, #yAxisGroup *")
               .transition()
                 .duration(500)
                 .style("opacity", 0)
+                .remove();
+            if (graphType == "age" || graphType == "income") {
+              area.y1(function(d) { return y(0); });
+              plot.transition()
+                .duration(500)
+                .attr("d", area(d3.keys(chartData).slice(1)))
                 .remove()
-              .on("end", setUp);
+                .on("end", function() {
+                  graphType = type;
+                  setUp();
+                });
+            } else {
+              d3.selectAll(".plot")
+                .transition()
+                  .duration(500)
+                  .attr("width", 0)
+                  .remove();
+              d3.timeout(function() {
+                graphType = type;
+                setUp();
+              }, 500);
+            }
           }
         }
       }
@@ -126,13 +145,14 @@
           d3.scaleLinear()
             .domain([0, d3.max(d3.keys(chartData).slice(1), function(d) { return chartData[d]; })]) :
           d3.scaleBand()
-            .domain(d3.keys(chartData).slice(1));
+            .domain(d3.keys(chartData).slice(1).reverse())
+            .padding(.2);
         resize();
       }
       function resize() {
         width = parseFloat(chart.style("width"));
         height = parseFloat(chart.style("height"));
-        margin = { top: 5, right: 15, bottom: 20, left: 30 };
+        margin = { top: 5, right: 15, bottom: 40, left: (type == "education" ? 70 : 30) };
         xAxisGroup.attr("transform", "translate(0, " + (height - margin.bottom) + ")")
         yAxisGroup.attr("transform", "translate(" + margin.left + ", 0)");
         x.range([margin.left, width - margin.right]);
@@ -152,20 +172,80 @@
           plot.transition()
             .duration(500)
             .attr("d", area(d3.keys(chartData).slice(1)));
-          xAxisScale = x;
-          xAxis = d3.axisBottom(xAxisScale);
+          xAxisScale = d3.scaleLinear()
+            .range(x.range());
+          xAxis = d3.axisBottom(xAxisScale)
+            .tickSizeOuter(0);
+          yAxis = d3.axisLeft(y)
+            .tickSizeOuter(0)
+            .tickSizeInner(margin.left + margin.right - width)
+            .ticks(4, ".0%");
           if (type == "age") {
              xAxisScale.domain([0, 100]);
              xAxis.ticks(5, ".0f");
           } else {
-            console.log("check");
-            xAxisScale.domain([0, 420000])
-            xAxis.ticks(5, "3s");
+            xAxisScale.domain([0, 420000]);
+            xAxis.ticks(5, "$3s");
           }
-          xAxisGroup.transition()
-            .duration(500)
-            .call(xAxis);
+          xAxisGroup.append("text")
+            .classed("axisLabel", true)
+            .text(type == "age" ? "age distribution" : "household income distribution")
+            .attr("y", 35)
+            .attr("x", margin.left + (width - margin.left - margin.right) / 2);
+          xAxisGroup.call(xAxis)
+            .style("opacity", 0)
+            .transition()
+              .duration(500)
+              .style("opacity", 1);
+          yAxisGroup.call(yAxis)
+            .style("opacity", 0)
+            .transition()
+              .duration(500)
+              .style("opacity", 1);
         } else {
+          bars = chartGroup
+            .selectAll(".plot")
+              .data(d3.keys(chartData).slice(1))
+            .enter().append("rect")
+              .classed("plot", true)
+              .classed(electorate, true)
+              .attr("y", function(d) { return y(d); })
+              .attr("x", x(0))
+              .attr("height", y.bandwidth())
+              .attr("width", 0)
+              .transition()
+                .duration(500)
+                .attr("width", function(d) { return x(chartData[d]) - x(0); });
+          xAxis = d3.axisBottom(x)
+            .tickSizeOuter(0)
+            .tickSizeInner(margin.top + margin.bottom - height)
+            .tickPadding(5)
+            .ticks(4, ".0%");
+          yAxis = d3.axisLeft(y)
+            .tickSize(0)
+            .tickPadding(5);
+          if (type == "age") {
+             xAxisScale.domain([0, 100]);
+             xAxis.ticks(5, ".0f");
+          } else {
+            xAxisScale.domain([0, 420000]);
+            xAxis.ticks(5, "$3s");
+          }
+          xAxisGroup.append("text")
+            .classed("axisLabel", true)
+            .text("residents' highest education")
+            .attr("y", 35)
+            .attr("x", margin.left + (width - margin.left - margin.right) / 2);
+          xAxisGroup.call(xAxis)
+            .style("opacity", 0)
+            .transition()
+              .duration(500)
+              .style("opacity", 1);
+          yAxisGroup.call(yAxis)
+            .style("opacity", 0)
+            .transition()
+              .duration(500)
+              .style("opacity", 1);
         }
       }
     </script>
