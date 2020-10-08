@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-155991615-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag("js", new Date());
+      gtag("config", "UA-155991615-1");
+    </script>
+    <!-- my stuff -->
+    <meta charset="utf-8">
+    <title>ACT electorate analyses</title>
+    <meta name="description" content="Demographic differences between the 2020 ACT elections.">
+    <meta name="keywords" content="act, election, electorates, ginninderra, yerrabi, murrumbidgee, kurrajong, brindabella, canberra">
+    <meta name="author" content="Markus Mannheim">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <link href="./resources/widgetStyle.css" rel="stylesheet">
+    <link href="./resources/abcLogo64.png" rel="icon">
+  </head>
+  <body>
+    <!-- initial layout -->
+    <div id="container">
+      <div id="selector"></div>
+      <svg id="chart">
+        <g id="xAxisGroup"></g>
+        <g id="yAxisGroup"></g>
+        <g id="chartGroup"></g>
+      </svg>
+    </div>
+    <script>
+      d3.queue()
+        .defer(d3.csv, "./resources/age.csv")
+        .defer(d3.csv, "./resources/income.csv")
+        .defer(d3.csv, "./resources/education.csv")
+        .awaitAll(function(error, data) {
+          if (error) throw error;
+          dataCollection = [];
+          ageData = [];
+          data[0].forEach(function(d) {
+            let keys = d3.keys(d).slice(1);
+            let row = { electorate: d.electorate };
+            for (key in keys) {
+              row[keys[key]] = +d[keys[key]];
+            };
+            ageData.push(row);
+          });
+          dataCollection.push(ageData);
+          incomeData = [];
+          data[1].forEach(function(d) {
+            let keys = d3.keys(d).slice(1);
+            let row = { electorate: d.electorate };
+            for (key in keys) {
+              row[keys[key]] = +d[keys[key]];
+            };
+            incomeData.push(row);
+          });
+          dataCollection.push(incomeData);
+          educationData = [];
+          data[2].forEach(function(d) {
+            let keys = d3.keys(d).slice(1);
+            let row = { electorate: d.electorate };
+            for (key in keys) {
+              row[keys[key]] = +d[keys[key]];
+            };
+            educationData.push(row);
+          });
+          dataCollection.push(educationData);
+          electorate = window.location.href.slice(window.location.href.lastIndexOf("?") + 1);
+          types = ["age", "income", "education"];
+          // page elements
+          container = d3.select("#container")
+            .classed(electorate, true);
+          chart = d3.select("#chart");
+          chartGroup = d3.select("#chartGroup");
+          xAxisGroup = d3.select("#xAxisGroup");
+          yAxisGroup = d3.select("#yAxisGroup");
+          selector = d3.select("#selector");
+          options = selector
+            .selectAll(".option")
+              .data(types)
+            .enter().append("div")
+              .classed("option", true)
+            .text(function(d) { return d.toUpperCase(); })
+            .on("click", click);
+          d3.select(".option").classed("selected", true);
+          type = "age";
+          graphType = "fresh";
+          assess();
+        });
+
+      function click(d) {
+        options.classed("selected", false);
+        d3.select(this)
+          .classed("selected", true);
+        type = d;
+        assess();
+      }
+      function assess() {
+        if (type !== graphType) {
+          if (graphType == "fresh") {
+            graphType = type;
+            setUp();
+          } else {
+            graphType = type;
+            d3.selectAll("#chartGroup *, #xAxisGroup *, #yAxisGroup *")
+              .transition()
+                .duration(500)
+                .style("opacity", 0)
+                .remove()
+              .on("end", setUp);
+          }
+        }
+      }
+      function setUp() {
+        chartData = dataCollection[types.findIndex(function(d) { return d == type; })]
+          .filter(function(d) { return d.electorate == electorate; })[0];
+        x = (type == "age" || type == "income") ?
+          d3.scalePoint()
+            .domain(d3.keys(chartData).slice(1)) :
+          d3.scaleLinear()
+            .domain([0, d3.max(d3.keys(chartData).slice(1), function(d) { return chartData[d]; })]);
+        y = (type == "age" || type == "income") ?
+          d3.scaleLinear()
+            .domain([0, d3.max(d3.keys(chartData).slice(1), function(d) { return chartData[d]; })]) :
+          d3.scaleBand()
+            .domain(d3.keys(chartData).slice(1));
+        resize();
+      }
+      function resize() {
+        width = parseFloat(chart.style("width"));
+        height = parseFloat(chart.style("height"));
+        margin = { top: 5, right: 15, bottom: 20, left: 30 };
+        xAxisGroup.attr("transform", "translate(0, " + (height - margin.bottom) + ")")
+        yAxisGroup.attr("transform", "translate(" + margin.left + ", 0)");
+        x.range([margin.left, width - margin.right]);
+        y.range([height - margin.bottom, margin.top]);
+        if (type == "age" || type == "income") {
+          area = d3.area()
+            .x(function(d) { return x(d); })
+            .y0(function() { return y(0); })
+            .y1(function() { return y(0); })
+            .curve(d3.curveBasis);
+          plot = chartGroup
+            .append("path")
+              .classed("plot", true)
+              .classed(electorate, true)
+              .attr("d", area(d3.keys(chartData).slice(1)));
+          area.y1(function(d) { return y(chartData[d]); });
+          plot.transition()
+            .duration(500)
+            .attr("d", area(d3.keys(chartData).slice(1)));
+          xAxisScale = x;
+          xAxis = d3.axisBottom(xAxisScale);
+          if (type == "age") {
+             xAxisScale.domain([0, 100]);
+             xAxis.ticks(5, ".0f");
+          } else {
+            console.log("check");
+            xAxisScale.domain([0, 420000])
+            xAxis.ticks(5, "3s");
+          }
+          xAxisGroup.transition()
+            .duration(500)
+            .call(xAxis);
+        } else {
+        }
+      }
+    </script>
+  </body>
+</html>
