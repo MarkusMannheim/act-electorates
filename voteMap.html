@@ -74,7 +74,7 @@
           let dimensions = document.getElementById("laborMap").getBoundingClientRect();
           width = dimensions.width;
           height = dimensions.height;
-          projection.fitExtent([[10, 10], [width - 10, height - 65]], boothData);
+          projection.fitExtent([[10, 10], [width - 10, height - 70]], boothData);
           types.forEach(function(d) {
             let colourScale = d3.scaleLinear()
               .domain(d3.extent(boothData.features, function(e) { return e.properties[d[0]]; }))
@@ -86,7 +86,7 @@
             let range = colourScale.domain();
             console.log(range);
             map.select(".legend")
-              .attr("transform", "translate(0, " + (height - 55) + ")")
+              .attr("transform", "translate(0, " + (height - 60) + ")")
               .append("defs")
                 .append("linearGradient")
                   .attr("id", d[0] + "Gradient")
