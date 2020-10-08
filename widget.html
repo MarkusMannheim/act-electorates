@@ -224,13 +224,6 @@
           yAxis = d3.axisLeft(y)
             .tickSize(0)
             .tickPadding(5);
-          if (type == "age") {
-             xAxisScale.domain([0, 100]);
-             xAxis.ticks(5, ".0f");
-          } else {
-            xAxisScale.domain([0, 420000]);
-            xAxis.ticks(5, "$3s");
-          }
           xAxisGroup.append("text")
             .classed("axisLabel", true)
             .text("residents' highest education")
