@@ -64,9 +64,6 @@ h1, p {
   box-shadow: 1px 1px 3px #333;
   font-size: .9rem;
 }
-.option:last-child {
-  margin-right: 0px;
-}
 .option:hover {
   background-color: #FFB300;
 }
