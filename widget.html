@@ -90,7 +90,6 @@
           graphType = "fresh";
           assess();
         });
-
       function click(d) {
         options.classed("selected", false);
         d3.select(this)
@@ -136,14 +135,20 @@
       function setUp() {
         chartData = dataCollection[types.findIndex(function(d) { return d == type; })]
           .filter(function(d) { return d.electorate == electorate; })[0];
-        x = (type == "age" || type == "income") ?
+        x = (type == "age") ?
           d3.scalePoint()
-            .domain(d3.keys(chartData).slice(1)) :
+            .domain(d3.keys(chartData).slice(1)):
+          (type == "income") ?
           d3.scaleLinear()
-            .domain([0, d3.max(d3.keys(chartData).slice(1), function(d) { return chartData[d]; })]);
-        y = (type == "age" || type == "income") ?
+            .domain(d3.extent(d3.keys(chartData).slice(1).map(function(d) { return +(d.slice(4)); }))).nice():
           d3.scaleLinear()
-            .domain([0, d3.max(d3.keys(chartData).slice(1), function(d) { return chartData[d]; })]) :
+            .domain([0, d3.max(d3.keys(chartData).slice(1), function(d) { return chartData[d]; })]).nice();
+        y = (type == "age") ?
+          d3.scaleLinear()
+            .domain([0, d3.max(d3.keys(chartData).slice(1), function(d) { return chartData[d]; })]).nice():
+          (type == "income") ?
+          d3.scaleLinear()
+            .domain([0, d3.max(d3.keys(chartData).slice(1), function(d) { return chartData[d]; })]).nice():
           d3.scaleBand()
             .domain(d3.keys(chartData).slice(1).reverse())
             .padding(.2);
@@ -152,14 +157,14 @@
       function resize() {
         width = parseFloat(chart.style("width"));
         height = parseFloat(chart.style("height"));
-        margin = { top: 5, right: 15, bottom: 40, left: (type == "education" ? 70 : 30) };
+        margin = { top: 5, right: 20, bottom: 40, left: (type == "education" ? 70 : 30) };
         xAxisGroup.attr("transform", "translate(0, " + (height - margin.bottom) + ")")
         yAxisGroup.attr("transform", "translate(" + margin.left + ", 0)");
         x.range([margin.left, width - margin.right]);
         y.range([height - margin.bottom, margin.top]);
         if (type == "age" || type == "income") {
           area = d3.area()
-            .x(function(d) { return x(d); })
+            .x(function(d) { return type == "age" ? x(d) : x(+(d.slice(4))); })
             .y0(function() { return y(0); })
             .y1(function() { return y(0); })
             .curve(d3.curveBasis);
@@ -174,7 +179,7 @@
             .attr("d", area(d3.keys(chartData).slice(1)));
           xAxisScale = d3.scaleLinear()
             .range(x.range());
-          xAxis = d3.axisBottom(xAxisScale)
+          xAxis = d3.axisBottom(type == "age" ? xAxisScale : x)
             .tickSizeOuter(0);
           yAxis = d3.axisLeft(y)
             .tickSizeOuter(0)
@@ -184,7 +189,6 @@
              xAxisScale.domain([0, 100]);
              xAxis.ticks(5, ".0f");
           } else {
-            xAxisScale.domain([0, 420000]);
             xAxis.ticks(5, "$3s");
           }
           xAxisGroup.append("text")
