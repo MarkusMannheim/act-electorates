@@ -1,0 +1,115 @@
+/* colours
+blue: #009CBF
+orange: #F75F00
+green: #00A388
+--tint-1: #333;
+--tint-2: #666;
+--tint-3: #999;
+--tint-4: #ccc;
+--tint-5: #e6e6e6;
+--tint-6: #f2f2f2;
+ */
+@font-face {
+  font-family: "ABCSans Regular";
+  font-style: normal;
+  font-weight: normal;
+  src: local("ABCSans Regular"), url("./abcsans-regular.woff") format("woff");
+}
+@font-face {
+  font-family: "ABCSans Light";
+  font-style: normal;
+  font-weight: normal;
+  src: local("ABCSans Light"), url("./abcsans-light.woff") format("woff");
+}
+@font-face {
+  font-family: "ABCSans Black";
+  font-style: normal;
+  font-weight: normal;
+  src: local("ABCSans Black"), url("./abcsans-black.woff") format("woff");
+}
+:root {
+  font-size: 1em;
+  font-family: "ABCSans Regular", "Arial", sans-serif;
+  color: #333;
+}
+body {
+  overflow: hidden;
+}
+#container {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin-bottom: .5rem;
+  display: flex;
+  flex-flow: column;
+}
+h1, p {
+  margin: 0;
+}
+#selector {
+  display: flex;
+  justify-content: flex-end;
+  font-family: "ABCSans Black", "Arial Black", sans-serif;
+  color: white;
+  margin-bottom: .5rem;
+}
+.option {
+  padding: 5px;
+  background-color: #ccc;
+  margin-right: 5px;
+  width: 80px;
+  text-align: center;
+  box-shadow: 1px 1px 3px #333;
+  font-size: .9rem;
+}
+.option:hover {
+  background-color: #FFB300;
+}
+.yerrabi .option.selected, .box.yerrabi, .plot.yerrabi {
+  background-color: #01CFFF;
+  fill: #01CFFF;
+}
+.ginninderra .option.selected, .box.ginninderra, .plot.ginninderra {
+  background-color: #FF6100;
+  fill: #FF6100;
+}
+.kurrajong .option.selected, .box.kurrajong, .plot.kurrajong {
+  background-color: #00B395;
+  fill: #00B395;
+}
+.murrumbidgee .option.selected, .box.murrumbidgee, .plot.murrumbidgee {
+  background-color: #FFB300;
+  fill: #FFB300;
+}
+.brindabella .option.selected, .box.brindabella, .plot.brindabella {
+  background-color: #248BC9;
+  fill: #248BC9;
+}
+#chart {
+  height: 100%;
+}
+.domain, .tick line {
+  stroke-width: .5;
+  stroke: #666;
+}
+.tick line {
+  stroke-dasharray: 3 3;
+}
+.tick text {
+  fill: #666;
+  font-size: .7rem;
+}
+.axisLabel {
+  font-size: .85rem;
+  fill: #333;
+}
+@media only screen and (min-width: 500px) {
+  .tick text {
+    font-size: .75rem;
+  }
+  body {
+    background-color: #f9f9f9;
+  }
+}
