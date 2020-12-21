@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-155991615-1"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'UA-155991615-1');
+    </script>
+    <!-- my stuff -->
+    <meta charset="utf-8">
+    <title>ACT COVID-19 travel</title>
+    <meta name="author" content="Markus Mannheim">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Initial scripts -->
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script src="https://d3js.org/topojson.v3.min.js"></script>
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v2.0.0/mapbox-gl.js"></script>
+    <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v2.0.0/mapbox-gl.css" rel="stylesheet">
+    <link href="./resources/mapStyle.css" rel="stylesheet">
+    <link href="./resources/abcLogo64.png" rel="icon">
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+      //
+      [ "Northern Beaches", "Bayside", "Blacktown City", "Blue Mountains City", "Burwood", "Camden", "Campbelltown City", "Canada Bay City", "Canterbury-Bankstown", "Central Coast", "Cumberland", "Fairfield City", "Georges River", "Hawkesbury City", "Hornsby Shire", "Hunter's Hill Municipality", "Inner West", "Ku-ring-gai", "Liverpool City", "Lane Cove Municipality", "Mosman Municipality", "North Sydney", "Parramatta City", "Penrith City", "Randwick City", "Ryde City", "Strathfield Municipality", "Sutherland Shire", "Sydney City", "The Hills Shire", "Waverley", "Willoughby City", "Wollondilly Shire", "Wollongong", "Woollahra City" ]
+      // set up MapBox engine
+      mapboxgl.accessToken = "pk.eyJ1IjoibmV3cy1vbjFpbmUiLCJhIjoiR3FlZFZlVSJ9._30EFE9XYhQitqf4gzRG-g";
+      var map = new mapboxgl.Map({
+        container: "map",
+        attributionControl: false,
+        style: "mapbox://styles/mapbox/light-v10",
+        center: [149.126944, -35.293056],
+        zoom: 11
+      });
+      // add navigation and custom attribution
+      map.on("load", function() {
+        map.addControl(new mapboxgl.AttributionControl({
+            compact: true
+          }))
+          .addControl(new mapboxgl.NavigationControl());
+        d3.timeout(function() {
+          map.flyTo({
+            zoom: 14.5,
+            duration: 7500,
+            center: [149.22925712030204, -35.31822889183442],
+            essential: true
+          });
+          d3.select(".marker")
+            .transition()
+              .duration(7500)
+              .style("opacity", 1);
+        }, 2000);
+      });
+    </script>
+  </body>
+</html>
